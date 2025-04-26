@@ -7,61 +7,70 @@
   <link rel="stylesheet" href="/src/style.css">
 </head>
 <body>
-  <div class="container">
-    <h1>MYNC 🎵</h1>
+  <div class="background">
 
-    <!-- Foto de perfil do usuário logado -->
-    <div id="userInfo" style="display: none; position: absolute; top: 20px; right: 20px;">
-      <img id="userPhoto" src="" alt="Foto de perfil" style="width: 50px; height: 50px; border-radius: 50%; cursor: pointer;">
-      <!-- Balãozinho para logout -->
-      <div id="userMenu" style="display: none; position: absolute; top: 60px; right: 0; background: white; border: 1px solid #ccc; border-radius: 8px; padding: 10px;">
-        <button id="logoutBtn" style="background: none; border: none; font-size: 1rem; cursor: pointer;">🚪 Sair</button>
-      </div>
-    </div>
-
-    <!-- Tela inicial de escolha -->
-    <div id="chooseRole">
-      <button id="chooseHost">🎙️ Sou Host</button>
-      <button id="chooseViewer">🎧 Sou Viewer</button>
-    </div>
-
-    <!-- Seção de login do Host -->
-    <div id="hostLoginSection" style="display: none;">
-      <button id="loginBtn">Login com Google</button>
-    </div>
-
-    <!-- Painel do Host -->
-    <div id="hostSection" style="display: none;">
-      <div class="box">
-        <h2>Controle do Streamer</h2>
-
-        <!-- Código gerado -->
-        <h3 id="codigoGerado">Código: </h3>
-
-        <input type="text" id="videoUrl" placeholder="Cole o link do YouTube">
-        <button id="sendLink">Enviar Link</button>
-
-        <div class="controls">
-          <button id="playBtn">▶️ Play</button>
-          <button id="pauseBtn">⏸️ Pause</button>
-        </div>
-
-        <div class="player-container">
-          <iframe id="playerHost" width="300" height="169" frameborder="0" allow="autoplay" allowfullscreen></iframe>
+    <!-- TopBar -->
+    <header class="top-bar">
+      <h1>MYNC 🎵</h1>
+      <div id="userInfo" style="display: none;">
+        <img id="userPhoto" src="" alt="Foto" class="user-photo">
+        <div id="userMenu" class="user-menu" style="display: none;">
+          <button id="logoutBtn">Sair</button>
         </div>
       </div>
-    </div>
+    </header>
 
-    <!-- Painel do Viewer -->
-    <div id="viewerSection" style="display: none;">
-      <div class="box">
-        <h2>Escutando 🎶</h2>
-        <div id="viewerStatus">Conectando...</div>
-        <div class="player-container">
-          <iframe id="playerViewer" width="300" height="169" frameborder="0" allow="autoplay" allowfullscreen></iframe>
-        </div>
+    <!-- Área principal -->
+    <main class="main-layout">
+
+      <!-- Player -->
+      <div class="player-area">
+        <iframe id="playerHost" frameborder="0" allow="autoplay" allowfullscreen></iframe>
+        <iframe id="playerViewer" frameborder="0" allow="autoplay" allowfullscreen style="display: none;"></iframe>
       </div>
-    </div>
+
+      <!-- Controles -->
+      <div class="controls-area">
+
+        <div id="loginSection" class="center-content">
+          <button id="loginBtn" class="main-button">Login com Google</button>
+        </div>
+
+        <div id="chooseRole" style="display: none;" class="center-content">
+          <button id="chooseHost" class="main-button">🎙️ Sou Host</button>
+          <button id="chooseViewer" class="main-button">🎧 Sou Viewer</button>
+        </div>
+
+        <div id="hostSection" style="display: none;">
+          <h2>Controle do Streamer</h2>
+          <p><strong>Código:</strong> <span id="codigoGerado"></span></p>
+
+          <div class="form-group">
+            <input type="text" id="videoUrl" placeholder="Cole o link do YouTube" class="input-field">
+            <button id="sendLink" class="main-button">Enviar Link</button>
+          </div>
+        </div>
+
+        <div id="viewerSection" style="display: none;" class="flex-layout">
+          <div class="player-area">
+            <iframe id="playerViewer" frameborder="0" allow="autoplay" allowfullscreen></iframe>
+          </div>
+        
+          <div class="controls-area">
+            <h2>Assistir 🎶</h2>
+        
+            <div class="form-group">
+              <input type="text" id="viewerCodeInput" placeholder="Digite o código" class="input-field">
+              <button id="connectBtn" class="main-button">Conectar</button>
+            </div>
+        
+            <div id="viewerStatus" style="margin-top: 10px;">Esperando conexão...</div>
+          </div>
+        </div>
+
+      </div>
+      
+    </main>
 
   </div>
 
