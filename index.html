@@ -3,24 +3,53 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>mync 🎵</title>
+  <title>MYNC 🎵</title>
   <link rel="stylesheet" href="/src/style.css">
 </head>
 <body>
   <div class="container">
-    <h1>mync 🎵</h1>
+    <h1>MYNC 🎵</h1>
 
-    <div class="box">
-      <h2>Host</h2>
-      <button id="gerar">Gerar Código</button>
-      <div id="codigoHost" class="codigo"></div>
+    <!-- Tela inicial de escolha -->
+    <div id="chooseRole">
+      <button id="chooseHost">🎙️ Sou Host</button>
+      <button id="chooseViewer">🎧 Sou Viewer</button>
     </div>
 
-    <div class="box">
-      <h2>Viewer</h2>
-      <input type="text" id="codigoViewer" placeholder="Digite o código">
-      <div id="mensagem" class="mensagem"></div>
+    <!-- Seção de login do Host -->
+    <div id="hostLoginSection" style="display: none;">
+      <button id="loginBtn">Login com Google</button>
     </div>
+
+    <!-- Painel do Host -->
+    <div id="hostSection" style="display: none;">
+      <div class="box">
+        <h2>Controle do Streamer</h2>
+        <input type="text" id="videoUrl" placeholder="Cole o link do YouTube">
+        <button id="sendLink">Enviar Link</button>
+
+        <div class="controls">
+          <button id="playBtn">▶️ Play</button>
+          <button id="pauseBtn">⏸️ Pause</button>
+        </div>
+
+        <div class="player-container">
+          <iframe id="playerHost" width="300" height="169" frameborder="0" allow="autoplay" allowfullscreen></iframe>
+        </div>
+      </div>
+    </div>
+
+    <!-- Painel do Viewer -->
+    <div id="viewerSection" style="display: none;">
+      <div class="box">
+        <h2>Escutando 🎶</h2>
+        <div id="viewerStatus">Conectando...</div>
+        <div class="player-container">
+          <iframe id="playerViewer" width="300" height="169" frameborder="0" allow="autoplay" allowfullscreen></iframe>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <script type="module" src="/src/app.js"></script>

@@ -68,3 +68,23 @@ input {
   font-size: 1.3rem;
   min-height: 40px;
 }
+
+#chooseRole {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+#chooseRole button {
+  padding: 12px 20px;
+  font-size: 1.2rem;
+  border-radius: 10px;
+  border: none;
+  background-color: #6c63ff;
+  color: white;
+  cursor: pointer;
+}
+
+#chooseRole button:hover {
+  background-color: #574fd6;
+}

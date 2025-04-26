@@ -1,8 +1,9 @@
-// Importar módulos Firebase
+// Importando Firebase
 import { initializeApp } from "firebase/app";
-import { getDatabase, ref, set, onValue, remove } from "firebase/database";
+import { getDatabase, ref, set, onValue, update } from "firebase/database";
+import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "firebase/auth";
 
-// Configurações do Firebase
+// Firebase Config
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -16,64 +17,134 @@ const firebaseConfig = {
 // Inicializar Firebase
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
 
-let codigoAtivo = null;
+const codigoHost = "stream";
 
-// Função para gerar código aleatório
-function gerarCodigo() {
-  return Math.floor(100000 + Math.random() * 900000).toString();
-}
+// Elementos
+const chooseRole = document.getElementById('chooseRole');
+const chooseHost = document.getElementById('chooseHost');
+const chooseViewer = document.getElementById('chooseViewer');
 
-// Evento de gerar código
-document.getElementById('gerar').addEventListener('click', async () => {
-  const codigo = gerarCodigo();
-  codigoAtivo = codigo;
+const hostLoginSection = document.getElementById('hostLoginSection');
+const hostSection = document.getElementById('hostSection');
+const viewerSection = document.getElementById('viewerSection');
 
-  await set(ref(db, 'codigos/' + codigo), {
-    ativo: true,
-    timestamp: Date.now()
-  });
+const loginBtn = document.getElementById('loginBtn');
+const playerHost = document.getElementById('playerHost');
+const playerViewer = document.getElementById('playerViewer');
+const viewerStatus = document.getElementById('viewerStatus');
 
-  document.getElementById('codigoHost').innerText = `Código: ${codigo}`;
+// Escolher Host
+chooseHost.addEventListener('click', () => {
+  chooseRole.style.display = "none";
+  hostLoginSection.style.display = "block";
 });
 
-// Evento de digitar o código
-document.getElementById('codigoViewer').addEventListener('input', () => {
-  const codigoDigitado = document.getElementById('codigoViewer').value;
+// Escolher Viewer
+chooseViewer.addEventListener('click', () => {
+  chooseRole.style.display = "none";
+  viewerSection.style.display = "block";
+  escutarAtualizacoesViewer();
+});
 
-  if (codigoDigitado.length === 6) { 
-    escutarCodigo(codigoDigitado);
+// Fazer login
+loginBtn.addEventListener('click', () => {
+  signInWithPopup(auth, provider)
+    .then((result) => {
+      console.log("Logado como", result.user.displayName);
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+});
+
+// Quando login acontecer
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    hostLoginSection.style.display = "none";
+    hostSection.style.display = "block";
+    escutarAtualizacoesHost();
   }
 });
 
-// Função para escutar o código no Firebase
-function escutarCodigo(codigo) {
-  const codigoRef = ref(db, 'codigos/' + codigo);
+// Funções do Host
+document.getElementById('sendLink').addEventListener('click', async () => {
+  const videoUrl = document.getElementById('videoUrl').value.trim();
+  if (!videoUrl) return;
 
+  const videoId = extrairVideoId(videoUrl);
+  if (!videoId) {
+    alert("Link inválido!");
+    return;
+  }
+
+  await set(ref(db, `codigos/${codigoHost}`), {
+    videoId: videoId,
+    isPlaying: false
+  });
+
+  atualizarPlayerHost(videoId);
+});
+
+document.getElementById('playBtn').addEventListener('click', async () => {
+  await update(ref(db, `codigos/${codigoHost}`), {
+    isPlaying: true
+  });
+});
+
+document.getElementById('pauseBtn').addEventListener('click', async () => {
+  await update(ref(db, `codigos/${codigoHost}`), {
+    isPlaying: false
+  });
+});
+
+// Funções do Viewer
+function escutarAtualizacoesViewer() {
+  const codigoRef = ref(db, `codigos/${codigoHost}`);
   onValue(codigoRef, (snapshot) => {
     if (snapshot.exists()) {
-      const dados = snapshot.val();
-      
-      const tempoAtual = Date.now();
-      const tempoCriado = dados.timestamp || 0;
-      const cincoMinutos = 5 * 60 * 1000; // 5 minutos em ms
-
-      // Checar se está dentro do prazo de validade
-      if (dados.ativo && (tempoAtual - tempoCriado) <= cincoMinutos) {
-        document.getElementById('mensagem').innerText = "🎵 Você conectou!";
-
-        // 🔥 Deletar o código depois de conectar
-        remove(codigoRef);
-      } else {
-        document.getElementById('mensagem').innerText = "❌ Código expirado.";
-        
-        // Também remove o código se já expirou
-        remove(codigoRef);
+      const data = snapshot.val();
+      if (data.videoId) {
+        atualizarPlayerViewer(data.videoId);
       }
-    } else {
-      document.getElementById('mensagem').innerText = "❌ Código inválido.";
+      if (data.isPlaying !== undefined) {
+        controlarPlayerViewer(data.isPlaying);
+      }
     }
-  }, {
-    onlyOnce: true // Lê apenas uma vez
   });
+}
+
+// Atualizar player do Host
+function atualizarPlayerHost(videoId) {
+  const embedUrl = `https://www.youtube.com/embed/${videoId}?enablejsapi=1`;
+  playerHost.src = embedUrl;
+}
+
+// Atualizar player do Viewer
+function atualizarPlayerViewer(videoId) {
+  const embedUrl = `https://www.youtube.com/embed/${videoId}?enablejsapi=1`;
+  playerViewer.src = embedUrl;
+}
+
+// Controlar player do Viewer
+function controlarPlayerViewer(play) {
+  const iframe = playerViewer.contentWindow;
+  if (!iframe) return;
+
+  if (play) {
+    iframe.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+    viewerStatus.innerText = "🎵 Tocando!";
+  } else {
+    iframe.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+    viewerStatus.innerText = "⏸️ Pausado!";
+  }
+}
+
+// Extrair ID do vídeo
+function extrairVideoId(url) {
+  const regex = /(?:youtube\.com\/.*v=|youtu\.be\/)([^&\n?#]+)/;
+  const match = url.match(regex);
+  return match ? match[1] : null;
 }
