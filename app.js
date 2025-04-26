@@ -1,13 +1,13 @@
-// Configurações do Firebase (coloque suas credenciais aqui)
+// Configurações do Firebase
 const firebaseConfig = {
-    apiKey: "SUA_API_KEY",
-    authDomain: "SEU_AUTH_DOMAIN",
-    databaseURL: "SEU_DATABASE_URL",
-    projectId: "SEU_PROJECT_ID",
-    storageBucket: "SEU_STORAGE_BUCKET",
-    messagingSenderId: "SEU_MESSAGING_SENDER_ID",
-    appId: "SEU_APP_ID"
-  };
+  apiKey: "AIzaSyBR-mKcMu-iSVRSxeC0JtEPeNdBMpBZTo8",
+  authDomain: "streammync.firebaseapp.com",
+  databaseURL: "https://streammync-default-rtdb.firebaseio.com",
+  projectId: "streammync",
+  storageBucket: "streammync.firebasestorage.app",
+  messagingSenderId: "596268608488",
+  appId: "1:596268608488:web:bac729bb50343c9020925d"
+};
   
   // Inicializar Firebase
   firebase.initializeApp(firebaseConfig);
