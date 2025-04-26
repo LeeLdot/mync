@@ -48,7 +48,7 @@ const firebaseConfig = {
   
     ref.on('value', (snapshot) => {
       if (snapshot.exists() && snapshot.val().ativo) {
-        document.getElementById('mensagem').innerText = "🌸 Você conectou!";
+        document.getElementById('mensagem').innerText = "🎵 Você conectou!";
       } else {
         document.getElementById('mensagem').innerText = "❌ Código inválido ou expirado.";
       }
