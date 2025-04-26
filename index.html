@@ -10,6 +10,15 @@
   <div class="container">
     <h1>MYNC 🎵</h1>
 
+    <!-- Foto de perfil do usuário logado -->
+    <div id="userInfo" style="display: none; position: absolute; top: 20px; right: 20px;">
+      <img id="userPhoto" src="" alt="Foto de perfil" style="width: 50px; height: 50px; border-radius: 50%; cursor: pointer;">
+      <!-- Balãozinho para logout -->
+      <div id="userMenu" style="display: none; position: absolute; top: 60px; right: 0; background: white; border: 1px solid #ccc; border-radius: 8px; padding: 10px;">
+        <button id="logoutBtn" style="background: none; border: none; font-size: 1rem; cursor: pointer;">🚪 Sair</button>
+      </div>
+    </div>
+
     <!-- Tela inicial de escolha -->
     <div id="chooseRole">
       <button id="chooseHost">🎙️ Sou Host</button>
@@ -25,6 +34,10 @@
     <div id="hostSection" style="display: none;">
       <div class="box">
         <h2>Controle do Streamer</h2>
+
+        <!-- Código gerado -->
+        <h3 id="codigoGerado">Código: </h3>
+
         <input type="text" id="videoUrl" placeholder="Cole o link do YouTube">
         <button id="sendLink">Enviar Link</button>
 

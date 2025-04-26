@@ -1,9 +1,9 @@
 // Importando Firebase
 import { initializeApp } from "firebase/app";
 import { getDatabase, ref, set, onValue, update } from "firebase/database";
-import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "firebase/auth";
+import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "firebase/auth";
 
-// Firebase Config
+// Configuração do Firebase
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -20,9 +20,17 @@ const db = getDatabase(app);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
-const codigoHost = "stream";
+// Função para gerar código aleatório
+function gerarCodigo() {
+  const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let codigo = '';
+  for (let i = 0; i < 6; i++) {
+    codigo += caracteres.charAt(Math.floor(Math.random() * caracteres.length));
+  }
+  return codigo;
+}
 
-// Elementos
+// Elementos da página
 const chooseRole = document.getElementById('chooseRole');
 const chooseHost = document.getElementById('chooseHost');
 const chooseViewer = document.getElementById('chooseViewer');
@@ -35,21 +43,26 @@ const loginBtn = document.getElementById('loginBtn');
 const playerHost = document.getElementById('playerHost');
 const playerViewer = document.getElementById('playerViewer');
 const viewerStatus = document.getElementById('viewerStatus');
+const userInfo = document.getElementById('userInfo');
+const userPhoto = document.getElementById('userPhoto');
+const userMenu = document.getElementById('userMenu');
+const logoutBtn = document.getElementById('logoutBtn');
 
-// Escolher Host
+window.codigoHost = ""; // Código gerado depois
+
+// Escolha de função
 chooseHost.addEventListener('click', () => {
   chooseRole.style.display = "none";
   hostLoginSection.style.display = "block";
 });
 
-// Escolher Viewer
 chooseViewer.addEventListener('click', () => {
   chooseRole.style.display = "none";
   viewerSection.style.display = "block";
   escutarAtualizacoesViewer();
 });
 
-// Fazer login
+// Login do Host
 loginBtn.addEventListener('click', () => {
   signInWithPopup(auth, provider)
     .then((result) => {
@@ -60,13 +73,42 @@ loginBtn.addEventListener('click', () => {
     });
 });
 
-// Quando login acontecer
+// Ação após login
 onAuthStateChanged(auth, (user) => {
   if (user) {
     hostLoginSection.style.display = "none";
     hostSection.style.display = "block";
+
+    // Mostrar foto de perfil
+    userPhoto.src = user.photoURL;
+    userInfo.style.display = "block";
+
+    const codigoGerado = gerarCodigo();
+    document.getElementById('codigoGerado').innerText = `Código: ${codigoGerado}`;
+    window.codigoHost = codigoGerado;
+
     escutarAtualizacoesHost();
   }
+});
+
+// Clicar na foto do usuário abre ou fecha o menu
+userPhoto.addEventListener('click', () => {
+  if (userMenu.style.display === "none") {
+    userMenu.style.display = "block";
+  } else {
+    userMenu.style.display = "none";
+  }
+});
+
+// Clicar em "Sair" desloga
+logoutBtn.addEventListener('click', () => {
+  signOut(auth)
+    .then(() => {
+      window.location.reload();
+    })
+    .catch((error) => {
+      console.error('Erro ao deslogar:', error);
+    });
 });
 
 // Funções do Host
@@ -80,29 +122,30 @@ document.getElementById('sendLink').addEventListener('click', async () => {
     return;
   }
 
-  await set(ref(db, `codigos/${codigoHost}`), {
+  await set(ref(db, `codigos/${window.codigoHost}`), {
     videoId: videoId,
-    isPlaying: false
+    isPlaying: false,
+    ownerId: auth.currentUser.uid
   });
 
   atualizarPlayerHost(videoId);
 });
 
 document.getElementById('playBtn').addEventListener('click', async () => {
-  await update(ref(db, `codigos/${codigoHost}`), {
+  await update(ref(db, `codigos/${window.codigoHost}`), {
     isPlaying: true
   });
 });
 
 document.getElementById('pauseBtn').addEventListener('click', async () => {
-  await update(ref(db, `codigos/${codigoHost}`), {
+  await update(ref(db, `codigos/${window.codigoHost}`), {
     isPlaying: false
   });
 });
 
 // Funções do Viewer
 function escutarAtualizacoesViewer() {
-  const codigoRef = ref(db, `codigos/${codigoHost}`);
+  const codigoRef = ref(db, `codigos/${window.codigoHost}`);
   onValue(codigoRef, (snapshot) => {
     if (snapshot.exists()) {
       const data = snapshot.val();
@@ -144,7 +187,12 @@ function controlarPlayerViewer(play) {
 
 // Extrair ID do vídeo
 function extrairVideoId(url) {
-  const regex = /(?:youtube\.com\/.*v=|youtu\.be\/)([^&\n?#]+)/;
-  const match = url.match(regex);
-  return match ? match[1] : null;
+  try {
+    const regex = /(?:youtu\.be\/|youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|v\/))([^?&"'>]+)/;
+    const match = url.match(regex);
+    return match ? match[1] : null;
+  } catch (error) {
+    console.error("Erro ao extrair ID do vídeo:", error);
+    return null;
+  }
 }
