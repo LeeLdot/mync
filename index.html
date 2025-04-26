@@ -2,36 +2,27 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Mync🎵</title>
-  <style>
-    body { font-family: Arial, sans-serif; padding: 20px; text-align: center; }
-    button, input { padding: 10px; margin: 10px; width: 80%; font-size: 16px; }
-    #mensagem { margin-top: 20px; font-size: 24px; }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>mync 🎵</title>
+  <link rel="stylesheet" href="/src/style.css">
 </head>
 <body>
+  <div class="container">
+    <h1>mync 🎵</h1>
 
-  <h1>Mync🎵</h1>
+    <div class="box">
+      <h2>Host</h2>
+      <button id="gerar">Gerar Código</button>
+      <div id="codigoHost" class="codigo"></div>
+    </div>
 
-  <div id="host">
-    <button id="gerar">Gerar Código</button>
-    <div id="codigoHost" style="margin-top:10px; font-size:20px;"></div>
+    <div class="box">
+      <h2>Viewer</h2>
+      <input type="text" id="codigoViewer" placeholder="Digite o código">
+      <div id="mensagem" class="mensagem"></div>
+    </div>
   </div>
 
-  <div id="viewer" style="margin-top:30px;">
-    <input type="text" id="codigoViewer" placeholder="Digite o código">
-    <button id="conectar">Conectar</button>
-  </div>
-
-  <div id="mensagem"></div>
-
-  <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-database-compat.js"></script>
-
-  <!-- App -->
-  <script src="app.js"></script>
-
+  <script type="module" src="/src/app.js"></script>
 </body>
 </html>
