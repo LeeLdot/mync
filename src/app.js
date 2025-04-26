@@ -1,5 +1,6 @@
+// Importar módulos Firebase
 import { initializeApp } from "firebase/app";
-import { getDatabase, ref, set, onValue } from "firebase/database";
+import { getDatabase, ref, set, onValue, remove } from "firebase/database";
 
 // Configurações do Firebase
 const firebaseConfig = {
@@ -12,18 +13,18 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
-// Inicializando Firebase
+// Inicializar Firebase
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
 let codigoAtivo = null;
 
-// Função gerar código
+// Função para gerar código aleatório
 function gerarCodigo() {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
-// Evento gerar código
+// Evento de gerar código
 document.getElementById('gerar').addEventListener('click', async () => {
   const codigo = gerarCodigo();
   codigoAtivo = codigo;
@@ -36,24 +37,43 @@ document.getElementById('gerar').addEventListener('click', async () => {
   document.getElementById('codigoHost').innerText = `Código: ${codigo}`;
 });
 
-// Evento código conectar
+// Evento de digitar o código
 document.getElementById('codigoViewer').addEventListener('input', () => {
   const codigoDigitado = document.getElementById('codigoViewer').value;
 
-  if (codigoDigitado.length === 6) { // Quando completar 6 dígitos
+  if (codigoDigitado.length === 6) { 
     escutarCodigo(codigoDigitado);
   }
 });
 
-// Função escutar código Firebase
+// Função para escutar o código no Firebase
 function escutarCodigo(codigo) {
   const codigoRef = ref(db, 'codigos/' + codigo);
 
   onValue(codigoRef, (snapshot) => {
-    if (snapshot.exists() && snapshot.val().ativo) {
-      document.getElementById('mensagem').innerText = "🎵 Você conectou!";
+    if (snapshot.exists()) {
+      const dados = snapshot.val();
+      
+      const tempoAtual = Date.now();
+      const tempoCriado = dados.timestamp || 0;
+      const cincoMinutos = 5 * 60 * 1000; // 5 minutos em ms
+
+      // Checar se está dentro do prazo de validade
+      if (dados.ativo && (tempoAtual - tempoCriado) <= cincoMinutos) {
+        document.getElementById('mensagem').innerText = "🎵 Você conectou!";
+
+        // 🔥 Deletar o código depois de conectar
+        remove(codigoRef);
+      } else {
+        document.getElementById('mensagem').innerText = "❌ Código expirado.";
+        
+        // Também remove o código se já expirou
+        remove(codigoRef);
+      }
     } else {
-      document.getElementById('mensagem').innerText = "❌ Código inválido ou expirado.";
+      document.getElementById('mensagem').innerText = "❌ Código inválido.";
     }
+  }, {
+    onlyOnce: true // Lê apenas uma vez
   });
 }
