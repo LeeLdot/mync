@@ -23,13 +23,23 @@ connectBtn.addEventListener('click', () => {
   }
 
   codigoAtual = codigo;
-  playerFrame.style.display = "block";
-
   viewerStatus.innerText = "⏳ Carregando player...";
-});
 
-// Deixa o iframe src vazio - YouTube API ainda vai carregar normal
-window.onYouTubeIframeAPIReady = () => {
+  // ✅ CRIAR o iframe dinamicamente
+  const iframe = document.createElement('iframe');
+  iframe.id = "playerFrame";
+  iframe.frameBorder = "0";
+  iframe.allow = "autoplay; fullscreen";
+  iframe.allowTransparency = "true";
+  iframe.style.width = "100%";
+  iframe.style.height = "400px";
+  iframe.src = "https://www.youtube.com/embed/M7lc1UVf-VE?enablejsapi=1&autoplay=0";
+  
+  const playerArea = document.getElementById('playerArea');
+  playerArea.innerHTML = ""; // Limpa área
+  playerArea.appendChild(iframe);
+
+  // ✅ Cria o YT.Player já no iframe criado
   ytPlayerViewer = new YT.Player('playerFrame', {
     events: {
       'onReady': () => {
@@ -39,4 +49,4 @@ window.onYouTubeIframeAPIReady = () => {
       }
     }
   });
-};
+});
