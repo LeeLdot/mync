@@ -8,8 +8,6 @@
 </head>
 <body>
   <div class="background">
-
-    <!-- TopBar -->
     <header class="top-bar">
       <h1>MYNC 🎵</h1>
       <div id="userInfo" style="display: none;">
@@ -20,18 +18,14 @@
       </div>
     </header>
 
-    <!-- Área principal -->
     <main class="main-layout">
-
       <!-- Player -->
       <div class="player-area">
-        <iframe id="playerHost" frameborder="0" allow="autoplay" allowfullscreen></iframe>
-        <iframe id="playerViewer" frameborder="0" allow="autoplay" allowfullscreen style="display: none;"></iframe>
+        <iframe id="playerFrame" frameborder="0" allow="autoplay" allowfullscreen style="display: none;"></iframe>
       </div>
 
       <!-- Controles -->
       <div class="controls-area">
-
         <div id="loginSection" class="center-content">
           <button id="loginBtn" class="main-button">Login com Google</button>
         </div>
@@ -44,34 +38,22 @@
         <div id="hostSection" style="display: none;">
           <h2>Controle do Streamer</h2>
           <p><strong>Código:</strong> <span id="codigoGerado"></span></p>
-
           <div class="form-group">
             <input type="text" id="videoUrl" placeholder="Cole o link do YouTube" class="input-field">
             <button id="sendLink" class="main-button">Enviar Link</button>
           </div>
         </div>
 
-        <div id="viewerSection" style="display: none;" class="flex-layout">
-          <div class="player-area">
-            <iframe id="playerViewer" frameborder="0" allow="autoplay" allowfullscreen></iframe>
+        <div id="viewerSection" style="display: none;">
+          <h2>Assistir 🎶</h2>
+          <div class="form-group">
+            <input type="text" id="viewerCodeInput" placeholder="Digite o código" class="input-field">
+            <button id="connectBtn" class="main-button">Conectar</button>
           </div>
-        
-          <div class="controls-area">
-            <h2>Assistir 🎶</h2>
-        
-            <div class="form-group">
-              <input type="text" id="viewerCodeInput" placeholder="Digite o código" class="input-field">
-              <button id="connectBtn" class="main-button">Conectar</button>
-            </div>
-        
-            <div id="viewerStatus" style="margin-top: 10px;">Esperando conexão...</div>
-          </div>
+          <div id="viewerStatus" style="margin-top: 10px;">Esperando conexão...</div>
         </div>
-
       </div>
-      
     </main>
-
   </div>
 
   <script type="module" src="/src/app.js"></script>
