@@ -21,20 +21,19 @@ export function escutarAtualizacoesViewer(codigoViewer) {
 
     // Se mudou o vídeo
     if (data.videoId && data.videoId !== videoAtual) {
-      const embedUrl = `https://www.youtube.com/embed/${data.videoId}?enablejsapi=1&autoplay=1`;
-      player.src = embedUrl;
+      player.loadVideoById(data.videoId); // 🛠️ YouTube API verdadeira
       videoAtual = data.videoId;
       return;
     }
 
-    // 🔥 Ajustar o tempo sempre
-    player.contentWindow.postMessage(`{"event":"command","func":"seekTo","args":[${data.currentTime}, true]}`, '*');
+    // 🔥 Corrige tempo
+    player.seekTo(data.currentTime, true);
 
-    // 🔥 Depois play/pause
+    // 🔥 Controle de play/pause
     if (data.isPlaying) {
-      player.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+      player.playVideo();
     } else {
-      player.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+      player.pauseVideo();
     }
   });
 }

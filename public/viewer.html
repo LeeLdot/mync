@@ -1,5 +1,4 @@
-//viewer.html
-'<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
@@ -18,15 +17,20 @@
     <main class="main-layout">
       <!-- Player Area -->
       <div class="player-area">
-        <iframe id="playerFrame" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>
+        <iframe
+          id="playerFrame"
+          frameborder="0"
+          allow="autoplay; fullscreen"
+          allowfullscreen
+          allowtransparency="true"
+          src=""   <!-- 🔥 Deixar src vazio inicialmente -->
+        ></iframe>
       </div>
 
       <!-- Conexão Viewer -->
       <div class="controls-area">
         <input type="text" id="viewerCodeInput" placeholder="Digite o código do Host" class="input-field">
-
         <button id="connectBtn" class="main-button">Conectar à Sala 🎶</button>
-
         <div id="viewerStatus" class="status-text">Aguardando conexão...</div>
       </div>
     </main>
