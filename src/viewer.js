@@ -3,8 +3,7 @@ import { ref, onValue } from "firebase/database";
 
 let player = null;
 let playerReady = false;
-let ultimoTempoHost = 0;
-let videoAtual = null; // <- novo controle de qual vídeo está no player
+let videoAtual = null;
 
 export function configurarViewerPlayer(p) {
   player = p;
@@ -14,32 +13,24 @@ export function configurarViewerPlayer(p) {
 export function escutarAtualizacoesViewer(codigoViewer) {
   const codigoRef = ref(db, `codigos/${codigoViewer}`);
 
-  window.addEventListener('message', (event) => {
-    if (!event.data || !event.data.info) return;
-
-    const viewerTime = event.data.info.currentTime;
-    const diferenca = Math.abs(viewerTime - ultimoTempoHost);
-
-    if (diferenca > 2) {
-      player.contentWindow.postMessage(`{"event":"command","func":"seekTo","args":[${ultimoTempoHost}, true]}`, '*');
-    }
-  });
-
   onValue(codigoRef, (snapshot) => {
     if (!snapshot.exists()) return;
     if (!player || !playerReady) return;
 
     const data = snapshot.val();
-    ultimoTempoHost = data.currentTime;
 
-    // 👇 Novo: Se o vídeo mudar, carregar o novo
+    // Se mudou o vídeo
     if (data.videoId && data.videoId !== videoAtual) {
       const embedUrl = `https://www.youtube.com/embed/${data.videoId}?enablejsapi=1&autoplay=1`;
       player.src = embedUrl;
       videoAtual = data.videoId;
+      return;
     }
 
-    // Play/Pause conforme o Host
+    // 🔥 Ajustar o tempo sempre
+    player.contentWindow.postMessage(`{"event":"command","func":"seekTo","args":[${data.currentTime}, true]}`, '*');
+
+    // 🔥 Depois play/pause
     if (data.isPlaying) {
       player.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
     } else {

@@ -1,3 +1,4 @@
+//viewerApp.js
 import { fazerLogout } from "./auth.js";
 import { configurarViewerPlayer, escutarAtualizacoesViewer } from "./viewer.js";
 

@@ -1,3 +1,4 @@
+//hostApp.js
 import { fazerLogout } from "./auth.js";
 import { gerarCodigo } from "./utils.js";
 import { enviarVideo } from "./host.js";
@@ -12,6 +13,8 @@ const videoUrlInput = document.getElementById('videoUrl');
 
 let codigoAtual = "";
 let ytPlayer = null;
+let ultimoEstado = null;
+let ultimoTempo = null;
 
 // Função principal para iniciar o Host
 async function iniciarHost() {
@@ -19,7 +22,6 @@ async function iniciarHost() {
   codigoAtual = codigo;
   codigoGeradoSpan.innerText = codigo;
 
-  // Cria a sala no Firebase imediatamente
   await set(ref(db, `codigos/${codigoAtual}`), {
     videoId: null,
     isPlaying: false,
@@ -58,7 +60,6 @@ function carregarVideo(videoId) {
   const embedUrl = `https://www.youtube.com/embed/${realId}?enablejsapi=1&autoplay=1`;
   playerFrame.src = embedUrl;
 
-  // Esperar o iframe carregar para inicializar YT.Player
   playerFrame.onload = () => {
     iniciarYouTubePlayer();
   };
@@ -88,11 +89,17 @@ function monitorarEstadoHost() {
     const estado = ytPlayer.getPlayerState();
     const tempo = ytPlayer.getCurrentTime();
 
-    update(ref(db, `codigos/${codigoAtual}`), {
-      isPlaying: estado === YT.PlayerState.PLAYING,
-      currentTime: tempo
-    });
-  }, 2000);
+    // Só atualiza se mudou
+    if (estado !== ultimoEstado || Math.abs(tempo - ultimoTempo) > 1) {
+      ultimoEstado = estado;
+      ultimoTempo = tempo;
+
+      update(ref(db, `codigos/${codigoAtual}`), {
+        isPlaying: estado === YT.PlayerState.PLAYING,
+        currentTime: tempo
+      });
+    }
+  }, 500); // Menor intervalo = mais responsivo
 }
 
 // Quando o estado do player mudar
