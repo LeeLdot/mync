@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+  <script src="https://www.youtube.com/iframe_api"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MYNC 🎵</title>
@@ -10,10 +11,11 @@
   <div class="background">
     <header class="top-bar">
       <h1>MYNC 🎵</h1>
-      <div id="userInfo" style="display: none;">
+      <div id="userInfo" style="display: none; position: relative;">
         <img id="userPhoto" src="" alt="Foto" class="user-photo">
         <div id="userMenu" class="user-menu" style="display: none;">
-          <button id="logoutBtn">Sair</button>
+          <button id="configBtn" class="menu-button">⚙️ Configurações</button>
+          <button id="logoutBtn" class="menu-button">🚪 Sair</button>
         </div>
       </div>
     </header>
@@ -38,14 +40,6 @@
           <div class="form-group">
             <input type="text" id="videoUrl" placeholder="Cole o link do YouTube" class="input-field">
             <button id="sendLink" class="main-button">Enviar Link</button>
-          </div>
-        </div>
-        <div id="userInfo" style="display: none; position: relative;">
-          <img id="userPhoto" src="" alt="Foto" class="user-photo">
-          
-          <div id="userMenu" class="user-menu" style="display: none;">
-            <button id="configBtn" class="menu-button">⚙️ Configurações</button>
-            <button id="logoutBtn" class="menu-button">🚪 Sair</button>
           </div>
         </div>
         <div id="viewerSection" style="display: none;">

@@ -1,9 +1,8 @@
 import { fazerLogin, monitorarLogin, fazerLogout } from "./auth.js";
 import { gerarCodigo } from "./utils.js";
-import { enviarVideo, escutarAtualizacoesHost, atualizarTempo, playVideo, pauseVideo } from "./host.js";
-import { escutarAtualizacoesViewer } from "./viewer.js";
+import { enviarVideo } from "./host.js";
 import { auth, db } from "./firebaseConfig.js";
-import { ref, set } from "firebase/database";
+import { ref, set, onValue, update } from "firebase/database";
 
 const loginSection = document.getElementById('loginSection');
 const chooseRole = document.getElementById('chooseRole');
@@ -17,6 +16,7 @@ const userMenu = document.getElementById('userMenu');
 
 let codigoAtual = "";
 let isHost = false;
+let playerReady = false;
 
 // LOGIN
 document.getElementById('loginBtn').addEventListener('click', async () => {
@@ -39,7 +39,7 @@ monitorarLogin((user) => {
   }
 });
 
-// ABRIR MENU USUÁRIO
+// MENU
 userPhoto.addEventListener('click', () => {
   userMenu.style.display = userMenu.style.display === "none" ? "flex" : "none";
 });
@@ -68,7 +68,6 @@ document.getElementById('chooseHost').addEventListener('click', async () => {
   codigoAtual = codigoGerado;
   playerFrame.style.display = "block";
 
-  // 🔥 Criar a sessão no Firebase mesmo sem vídeo
   await set(ref(db, `codigos/${codigoGerado}`), {
     videoId: null,
     isPlaying: false,
@@ -76,15 +75,7 @@ document.getElementById('chooseHost').addEventListener('click', async () => {
     ownerId: auth.currentUser.uid
   });
 
-  // Escutar atualizações
-  escutarAtualizacoesHost(codigoGerado, (snapshot) => {
-    if (snapshot.exists()) {
-      const data = snapshot.val();
-      if (data.videoId) carregarVideo(data.videoId);
-    }
-  });
-
-  atualizarTempoPeriodicamente();
+  monitorarEstadoHost();
 });
 
 // ESCOLHER VIEWER
@@ -94,7 +85,7 @@ document.getElementById('chooseViewer').addEventListener('click', () => {
   viewerSection.style.display = "block";
 });
 
-// HOST envia link
+// HOST envia vídeo
 document.getElementById('sendLink').addEventListener('click', () => {
   const url = document.getElementById('videoUrl').value.trim();
   if (!url) return;
@@ -111,24 +102,26 @@ document.getElementById('connectBtn').addEventListener('click', () => {
   codigoAtual = codigo;
   playerFrame.style.display = "block";
 
-  escutarAtualizacoesViewer(codigoAtual, (snapshot) => {
+  onValue(ref(db, `codigos/${codigoAtual}`), (snapshot) => {
     if (snapshot.exists()) {
       const data = snapshot.val();
       if (data.videoId) carregarVideo(data.videoId);
-      document.getElementById('viewerStatus').innerText = "🎶 Conectado!";
+
+      sincronizarComHost(data);
     } else {
       document.getElementById('viewerStatus').innerText = "❌ Código inválido!";
     }
   });
+
+  document.getElementById('viewerStatus').innerText = "🎶 Conectado!";
 });
 
-// Funções utilitárias
+// Funções
 
 function carregarVideo(videoId) {
   if (!videoId) return;
   let realId = videoId;
-  
-  // Se for link completo, extrair o ID do YouTube
+
   if (videoId.includes("youtube.com") || videoId.includes("youtu.be")) {
     const match = videoId.match(/[?&]v=([^&#]*)/) || videoId.match(/youtu\.be\/([^&#]*)/);
     if (match && match[1]) {
@@ -136,14 +129,89 @@ function carregarVideo(videoId) {
     }
   }
 
-  const embedUrl = `https://www.youtube.com/embed/${realId}?enablejsapi=1`;
+  const embedUrl = `https://www.youtube.com/embed/${realId}?enablejsapi=1&autoplay=1`;
   playerFrame.src = embedUrl;
+
+  // Quando player carregar
+  playerFrame.onload = () => {
+    playerReady = true;
+  };
 }
 
-function atualizarTempoPeriodicamente() {
+function monitorarEstadoHost() {
   setInterval(() => {
-    if (isHost && playerFrame.contentWindow) {
-      playerFrame.contentWindow.postMessage('{"event":"listening","id":1}', '*');
-    }
+    if (!isHost || !playerFrame.contentWindow) return;
+
+    playerFrame.contentWindow.postMessage('{"event":"listening","id":1}', '*');
+
+    window.addEventListener('message', (event) => {
+      if (event.data && event.data.info) {
+        const { playerState, currentTime } = event.data.info;
+
+        if (playerState !== undefined && currentTime !== undefined) {
+          const updates = {
+            currentTime: currentTime,
+            isPlaying: playerState === 1 // 1 = Playing
+          };
+
+          update(ref(db, `codigos/${codigoAtual}`), updates);
+        }
+      }
+    }, { once: true });
   }, 2000);
+}
+
+function sincronizarComHost(data) {
+  if (!playerReady) return;
+
+  const iframe = playerFrame.contentWindow;
+  if (!iframe) return;
+
+  if (data.isPlaying) {
+    iframe.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+  } else {
+    iframe.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+  }
+
+  // Sincronizar tempo se diferença > 2s
+  iframe.postMessage('{"event":"listening","id":1}', '*');
+
+  window.addEventListener('message', (event) => {
+    if (event.data && event.data.info && event.data.info.currentTime !== undefined) {
+      const viewerTime = event.data.info.currentTime;
+      const diferenca = Math.abs(viewerTime - data.currentTime);
+
+      if (diferenca > 2) {
+        iframe.postMessage(`{"event":"command","func":"seekTo","args":[${data.currentTime}, true]}`, '*');
+      }
+    }
+  }, { once: true });
+}
+
+let ytPlayer = null;
+
+window.onYouTubeIframeAPIReady = () => {
+  ytPlayer = new YT.Player('playerFrame', {
+    events: {
+      'onReady': onPlayerReady,
+      'onStateChange': onPlayerStateChange
+    }
+  });
+};
+
+function onPlayerReady(event) {
+  console.log("YouTube Player Pronto!");
+}
+
+function onPlayerStateChange(event) {
+  if (!isHost) return;
+
+  const playerState = event.data;
+  const currentTime = ytPlayer.getCurrentTime();
+
+  // Atualizar o estado no Firebase
+  update(ref(db, `codigos/${codigoAtual}`), {
+    isPlaying: playerState === YT.PlayerState.PLAYING,
+    currentTime: currentTime
+  });
 }
