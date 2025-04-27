@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MYNC 🎵 Login</title>
+  <link rel="stylesheet" href="/src/style.css">
+</head>
+<body>
+  <div class="background">
+    <div class="center-content">
+      <h1>MYNC 🎵</h1>
+      <button id="loginBtn" class="main-button">Login com Google</button>
+    </div>
+  </div>
+
+  <script type="module">
+    import { fazerLogin, monitorarLogin } from '/src/auth.js';
+
+    document.getElementById('loginBtn').addEventListener('click', async () => {
+      await fazerLogin();
+    });
+
+    monitorarLogin((user) => {
+      if (user) {
+        window.location.href = "/role.html";
+      }
+    });
+  </script>
+  <script type="module" src="/src/loginApp.js"></script>
+</body>
+</html>

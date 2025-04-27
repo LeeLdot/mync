@@ -1,30 +1,49 @@
 import { db } from "./firebaseConfig.js";
 import { ref, onValue } from "firebase/database";
 
-export function escutarAtualizacoesViewer(codigoViewer, callback) {
-  const codigoRef = ref(db, `codigos/${codigoViewer}`);
-  onValue(codigoRef, callback);
+let player = null;
+let playerReady = false;
+let ultimoTempoHost = 0;
+let videoAtual = null; // <- novo controle de qual vídeo está no player
+
+export function configurarViewerPlayer(p) {
+  player = p;
+  playerReady = true;
 }
 
-onValue(ref(db, `codigos/${codigoAtual}`), (snapshot) => {
-  if (snapshot.exists()) {
-    const data = snapshot.val();
+export function escutarAtualizacoesViewer(codigoViewer) {
+  const codigoRef = ref(db, `codigos/${codigoViewer}`);
 
-    if (data.videoId) carregarVideo(data.videoId);
+  window.addEventListener('message', (event) => {
+    if (!event.data || !event.data.info) return;
 
-    if (ytPlayer) {
-      if (data.isPlaying) {
-        ytPlayer.playVideo();
-      } else {
-        ytPlayer.pauseVideo();
-      }
+    const viewerTime = event.data.info.currentTime;
+    const diferenca = Math.abs(viewerTime - ultimoTempoHost);
 
-      const viewerTime = ytPlayer.getCurrentTime();
-      const diferenca = Math.abs(viewerTime - data.currentTime);
-
-      if (diferenca > 2) {
-        ytPlayer.seekTo(data.currentTime, true);
-      }
+    if (diferenca > 2) {
+      player.contentWindow.postMessage(`{"event":"command","func":"seekTo","args":[${ultimoTempoHost}, true]}`, '*');
     }
-  }
-});
+  });
+
+  onValue(codigoRef, (snapshot) => {
+    if (!snapshot.exists()) return;
+    if (!player || !playerReady) return;
+
+    const data = snapshot.val();
+    ultimoTempoHost = data.currentTime;
+
+    // 👇 Novo: Se o vídeo mudar, carregar o novo
+    if (data.videoId && data.videoId !== videoAtual) {
+      const embedUrl = `https://www.youtube.com/embed/${data.videoId}?enablejsapi=1&autoplay=1`;
+      player.src = embedUrl;
+      videoAtual = data.videoId;
+    }
+
+    // Play/Pause conforme o Host
+    if (data.isPlaying) {
+      player.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+    } else {
+      player.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+    }
+  });
+}

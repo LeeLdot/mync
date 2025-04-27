@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MYNC 🎵 - Host</title>
+  <link rel="stylesheet" href="/src/style.css">
+  <script src="https://www.youtube.com/iframe_api"></script>
+</head>
+<body>
+  <div class="background">
+    <header class="top-bar">
+      <h1>MYNC 🎵 - Host</h1>
+      <button id="logoutBtn" class="menu-button">Sair</button>
+    </header>
+
+    <main class="main-layout">
+      <!-- Player Area -->
+      <div class="player-area">
+        <iframe id="playerFrame" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>
+      </div>
+
+      <!-- Controles Host -->
+      <div class="controls-area">
+        <p><strong>Código da Sala:</strong> <span id="codigoGerado"></span></p>
+
+        <input type="text" id="videoUrl" placeholder="Cole o link do YouTube aqui" class="input-field">
+
+        <button id="sendLink" class="main-button">Enviar Vídeo 🎥</button>
+      </div>
+    </main>
+  </div>
+
+  <!-- Script do Host -->
+  <script type="module" src="/src/hostApp.js"></script>
+</body>
+</html>

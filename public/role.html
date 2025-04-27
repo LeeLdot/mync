@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MYNC 🎵 Escolher Função</title>
+  <link rel="stylesheet" href="/src/style.css">
+</head>
+<body>
+  <div class="background">
+    <div class="center-content">
+      <h1>Escolha seu papel 🎵</h1>
+      <button id="chooseHost" class="main-button">🎙️ Sou Host</button>
+      <button id="chooseViewer" class="main-button">🎧 Sou Viewer</button>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('chooseHost').addEventListener('click', () => {
+      window.location.href = "/host.html";
+    });
+
+    document.getElementById('chooseViewer').addEventListener('click', () => {
+      window.location.href = "/viewer.html";
+    });
+  </script>
+</body>
+</html>

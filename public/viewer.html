@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MYNC 🎵 - Viewer</title>
+  <link rel="stylesheet" href="/src/style.css">
+  <script src="https://www.youtube.com/iframe_api"></script>
+</head>
+<body>
+  <div class="background">
+    <header class="top-bar">
+      <h1>MYNC 🎵 - Viewer</h1>
+      <button id="logoutBtn" class="menu-button">Sair</button>
+    </header>
+
+    <main class="main-layout">
+      <!-- Player Area -->
+      <div class="player-area">
+        <iframe id="playerFrame" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>
+      </div>
+
+      <!-- Conexão Viewer -->
+      <div class="controls-area">
+        <input type="text" id="viewerCodeInput" placeholder="Digite o código do Host" class="input-field">
+
+        <button id="connectBtn" class="main-button">Conectar à Sala 🎶</button>
+
+        <div id="viewerStatus" class="status-text">Aguardando conexão...</div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Script do Viewer -->
+  <script type="module" src="/src/viewerApp.js"></script>
+</body>
+</html>
