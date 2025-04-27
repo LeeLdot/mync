@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MYNC 🎵 Escolher Função</title>
   <link rel="stylesheet" href="/src/style.css">
+  <script type="module" src="/src/roleApp.js"></script>
 </head>
 <body>
   <div class="background">
@@ -14,15 +15,5 @@
       <button id="chooseViewer" class="main-button">🎧 Sou Viewer</button>
     </div>
   </div>
-
-  <script>
-    document.getElementById('chooseHost').addEventListener('click', () => {
-      window.location.href = "/host.html";
-    });
-
-    document.getElementById('chooseViewer').addEventListener('click', () => {
-      window.location.href = "/viewer.html";
-    });
-  </script>
 </body>
 </html>

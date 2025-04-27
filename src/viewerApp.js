@@ -1,9 +1,11 @@
 import { fazerLogout } from "./auth.js";
+import { db } from "./firebaseConfig.js";
+import { ref, get } from "firebase/database";
 import { configurarViewerPlayer, escutarAtualizacoesViewer } from "./viewer.js";
 
 const logoutBtn = document.getElementById('logoutBtn');
 const connectBtn = document.getElementById('connectBtn');
-const playerFrame = document.getElementById('playerFrame');
+const playerArea = document.getElementById('playerArea');
 const viewerStatus = document.getElementById('viewerStatus');
 const viewerCodeInput = document.getElementById('viewerCodeInput');
 
@@ -15,7 +17,7 @@ logoutBtn.addEventListener('click', async () => {
   window.location.href = "/login.html";
 });
 
-connectBtn.addEventListener('click', () => {
+connectBtn.addEventListener('click', async () => {
   const codigo = viewerCodeInput.value.trim();
   if (!codigo) {
     viewerStatus.innerText = "❌ Código inválido!";
@@ -23,9 +25,21 @@ connectBtn.addEventListener('click', () => {
   }
 
   codigoAtual = codigo;
-  viewerStatus.innerText = "⏳ Carregando player...";
+  viewerStatus.innerText = "⏳ Conectando...";
 
-  // ✅ CRIAR o iframe dinamicamente
+  const codigoRef = ref(db, `codigos/${codigoAtual}`);
+  const snapshot = await get(codigoRef);
+
+  if (!snapshot.exists()) {
+    viewerStatus.innerText = "❌ Código não encontrado!";
+    return;
+  }
+
+  // Sala existe
+  criarIframe();
+});
+
+function criarIframe() {
   const iframe = document.createElement('iframe');
   iframe.id = "playerFrame";
   iframe.frameBorder = "0";
@@ -33,20 +47,20 @@ connectBtn.addEventListener('click', () => {
   iframe.allowTransparency = "true";
   iframe.style.width = "100%";
   iframe.style.height = "400px";
-  iframe.src = "https://www.youtube.com/embed/M7lc1UVf-VE?enablejsapi=1&autoplay=0";
-  
-  const playerArea = document.getElementById('playerArea');
-  playerArea.innerHTML = ""; // Limpa área
+  iframe.src = "https://www.youtube.com/embed/?enablejsapi=1"; // 🔥 Aqui é o segredo!
+
+  playerArea.innerHTML = "";
   playerArea.appendChild(iframe);
 
-  // ✅ Cria o YT.Player já no iframe criado
-  ytPlayerViewer = new YT.Player('playerFrame', {
-    events: {
-      'onReady': () => {
-        configurarViewerPlayer(ytPlayerViewer);
-        escutarAtualizacoesViewer(codigoAtual);
-        viewerStatus.innerText = "🎶 Conectado!";
+  setTimeout(() => {
+    ytPlayerViewer = new YT.Player('playerFrame', {
+      events: {
+        'onReady': () => {
+          configurarViewerPlayer(ytPlayerViewer);
+          viewerStatus.innerText = "🎶 Conectado!";
+          escutarAtualizacoesViewer(codigoAtual);
+        }
       }
-    }
-  });
-});
+    });
+  }, 300);
+}

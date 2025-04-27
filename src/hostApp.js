@@ -1,34 +1,25 @@
-//hostApp.js
 import { fazerLogout } from "./auth.js";
-import { gerarCodigo } from "./utils.js";
 import { enviarVideo } from "./host.js";
-import { auth, db } from "./firebaseConfig.js";
-import { ref, set, update } from "firebase/database";
+import { auth } from "./firebaseConfig.js"; // 🔥 Adicionado para enviar corretamente
+import { ref, update } from "firebase/database";
+import { db } from "./firebaseConfig.js";
 
 const logoutBtn = document.getElementById('logoutBtn');
 const sendLinkBtn = document.getElementById('sendLink');
-const playerFrame = document.getElementById('playerFrame');
+const playerArea = document.getElementById('playerArea');
 const codigoGeradoSpan = document.getElementById('codigoGerado');
 const videoUrlInput = document.getElementById('videoUrl');
 
-let codigoAtual = "";
+let codigoAtual = sessionStorage.getItem('codigoAtual');
 let ytPlayer = null;
-let ultimoEstado = null;
-let ultimoTempo = null;
 
-// Função principal para iniciar o Host
-async function iniciarHost() {
-  const codigo = gerarCodigo();
-  codigoAtual = codigo;
-  codigoGeradoSpan.innerText = codigo;
-
-  await set(ref(db, `codigos/${codigoAtual}`), {
-    videoId: null,
-    isPlaying: false,
-    currentTime: 0,
-    ownerId: auth.currentUser.uid
-  });
+// 🔥 Se não tem código salvo, volta pro role.html
+if (!codigoAtual) {
+  window.location.href = "/role.html";
 }
+
+// Exibe o código gerado na tela
+codigoGeradoSpan.innerText = codigoAtual;
 
 // Botão logout
 logoutBtn.addEventListener('click', async () => {
@@ -45,11 +36,11 @@ sendLinkBtn.addEventListener('click', () => {
   carregarVideo(url);
 });
 
-// Carregar o vídeo no player
+// Carrega o vídeo no iframe
 function carregarVideo(videoId) {
   if (!videoId) return;
-  let realId = videoId;
 
+  let realId = videoId;
   if (videoId.includes("youtube.com") || videoId.includes("youtu.be")) {
     const match = videoId.match(/[?&]v=([^&#]*)/) || videoId.match(/youtu\.be\/([^&#]*)/);
     if (match && match[1]) {
@@ -58,60 +49,43 @@ function carregarVideo(videoId) {
   }
 
   const embedUrl = `https://www.youtube.com/embed/${realId}?enablejsapi=1&autoplay=1`;
-  playerFrame.src = embedUrl;
 
-  playerFrame.onload = () => {
-    iniciarYouTubePlayer();
-  };
+  const iframe = document.createElement('iframe');
+  iframe.id = "playerFrame";
+  iframe.frameBorder = "0";
+  iframe.allow = "autoplay; fullscreen";
+  iframe.allowTransparency = "true";
+  iframe.style.width = "100%";
+  iframe.style.height = "400px";
+  iframe.src = embedUrl;
+
+  playerArea.innerHTML = "";
+  playerArea.appendChild(iframe);
+
+  setTimeout(() => {
+    ytPlayer = new YT.Player('playerFrame', {
+      events: {
+        'onReady': onPlayerReady,
+        'onStateChange': onPlayerStateChange
+      }
+    });
+  }, 300);
 }
 
-// Inicializar YT.Player no iframe
-function iniciarYouTubePlayer() {
-  ytPlayer = new YT.Player('playerFrame', {
-    events: {
-      'onReady': onPlayerReady,
-      'onStateChange': onPlayerStateChange
-    }
-  });
-}
-
-// Quando o player do YouTube estiver pronto
+// Quando o player estiver pronto
 function onPlayerReady() {
   console.log("YouTube Player pronto!");
-  monitorarEstadoHost();
 }
 
-// Monitorar estado do player do Host
-function monitorarEstadoHost() {
-  setInterval(() => {
-    if (!ytPlayer) return;
-
-    const estado = ytPlayer.getPlayerState();
-    const tempo = ytPlayer.getCurrentTime();
-
-    // Só atualiza se mudou
-    if (estado !== ultimoEstado || Math.abs(tempo - ultimoTempo) > 1) {
-      ultimoEstado = estado;
-      ultimoTempo = tempo;
-
-      update(ref(db, `codigos/${codigoAtual}`), {
-        isPlaying: estado === YT.PlayerState.PLAYING,
-        currentTime: tempo
-      });
-    }
-  }, 500); // Menor intervalo = mais responsivo
-}
-
-// Quando o estado do player mudar
+// Quando mudar o estado do player (play/pause)
 function onPlayerStateChange(event) {
-  const playerState = event.data;
-  const currentTime = ytPlayer.getCurrentTime();
+  if (!ytPlayer) return;
+
+  const estado = event.data;
+  const tempo = ytPlayer.getCurrentTime();
 
   update(ref(db, `codigos/${codigoAtual}`), {
-    isPlaying: playerState === YT.PlayerState.PLAYING,
-    currentTime: currentTime
+    isPlaying: estado === YT.PlayerState.PLAYING,
+    currentTime: tempo
   });
 }
-
-// Começar o fluxo ao carregar a página
-iniciarHost();
