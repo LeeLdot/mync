@@ -9,6 +9,8 @@ const chooseRole = document.getElementById('chooseRole');
 const hostSection = document.getElementById('hostSection');
 const viewerSection = document.getElementById('viewerSection');
 const playerFrame = document.getElementById('playerFrame');
+const userPhoto = document.getElementById('userPhoto');
+const userMenu = document.getElementById('userMenu');
 
 let codigoAtual = "";
 let isHost = false;
@@ -24,7 +26,11 @@ monitorarLogin((user) => {
     document.getElementById('userPhoto').src = user.photoURL;
     document.getElementById('userInfo').style.display = "block";
   } else {
-    location.reload();
+    loginSection.style.display = "block";
+    chooseRole.style.display = "none";
+    hostSection.style.display = "none";
+    viewerSection.style.display = "none";
+    playerFrame.style.display = "none";
   }
 });
 
@@ -86,3 +92,42 @@ function atualizarTempoPeriodicamente() {
     }
   }, 2000);
 }
+
+document.getElementById('logoutBtn').addEventListener('click', async () => {
+  await fazerLogout();
+  
+  // Reset interface
+  loginSection.style.display = "block";
+  chooseRole.style.display = "none";
+  hostSection.style.display = "none";
+  viewerSection.style.display = "none";
+  playerFrame.style.display = "none";
+  document.getElementById('userInfo').style.display = "none";
+
+  // Limpar player
+  playerFrame.src = "";
+
+  console.log("Deslogado com sucesso!");
+});
+
+// menufoto
+userPhoto.addEventListener('click', () => {
+  if (userMenu.style.display === "none" || userMenu.style.display === "") {
+    userMenu.style.display = "flex";
+  } else {
+    userMenu.style.display = "none";
+  }
+});
+
+// Logout
+document.getElementById('logoutBtn').addEventListener('click', async () => {
+  await fazerLogout();
+  loginSection.style.display = "block";
+  chooseRole.style.display = "none";
+  hostSection.style.display = "none";
+  viewerSection.style.display = "none";
+  playerFrame.style.display = "none";
+  userInfo.style.display = "none";
+  userMenu.style.display = "none";
+  playerFrame.src = "";
+});

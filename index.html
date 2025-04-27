@@ -23,18 +23,15 @@
       <div class="player-area">
         <iframe id="playerFrame" frameborder="0" allow="autoplay" allowfullscreen style="display: none;"></iframe>
       </div>
-
       <!-- Controles -->
       <div class="controls-area">
         <div id="loginSection" class="center-content">
           <button id="loginBtn" class="main-button">Login com Google</button>
         </div>
-
         <div id="chooseRole" style="display: none;" class="center-content">
           <button id="chooseHost" class="main-button">🎙️ Sou Host</button>
           <button id="chooseViewer" class="main-button">🎧 Sou Viewer</button>
         </div>
-
         <div id="hostSection" style="display: none;">
           <h2>Controle do Streamer</h2>
           <p><strong>Código:</strong> <span id="codigoGerado"></span></p>
@@ -43,7 +40,14 @@
             <button id="sendLink" class="main-button">Enviar Link</button>
           </div>
         </div>
-
+        <div id="userInfo" style="display: none; position: relative;">
+          <img id="userPhoto" src="" alt="Foto" class="user-photo">
+          
+          <div id="userMenu" class="user-menu" style="display: none;">
+            <button id="configBtn" class="menu-button">⚙️ Configurações</button>
+            <button id="logoutBtn" class="menu-button">🚪 Sair</button>
+          </div>
+        </div>
         <div id="viewerSection" style="display: none;">
           <h2>Assistir 🎶</h2>
           <div class="form-group">
@@ -55,7 +59,6 @@
       </div>
     </main>
   </div>
-
   <script type="module" src="/src/app.js"></script>
 </body>
 </html>
