@@ -1,6 +1,6 @@
 import { fazerLogout } from "./auth.js";
 import { enviarVideo } from "./host.js";
-import { auth } from "./firebaseConfig.js"; // 🔥 Adicionado para enviar corretamente
+import { auth } from "./firebaseConfig.js";
 import { ref, update } from "firebase/database";
 import { db } from "./firebaseConfig.js";
 
@@ -13,7 +13,7 @@ const videoUrlInput = document.getElementById('videoUrl');
 let codigoAtual = sessionStorage.getItem('codigoAtual');
 let ytPlayer = null;
 
-// 🔥 Se não tem código salvo, volta pro role.html
+// Se não tem código salvo, volta pro role.html
 if (!codigoAtual) {
   window.location.href = "/role.html";
 }

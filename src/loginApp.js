@@ -1,9 +1,8 @@
-//loginApp.js
 import { fazerLogin, monitorarLogin } from "./auth.js";
 
 const loginBtn = document.getElementById('loginBtn');
 
-// Deixa o botão seguro contra múltiplos cliques
+// Multi-Click block
 loginBtn.addEventListener('click', async () => {
   loginBtn.disabled = true; // Desabilita o botão imediatamente
   try {

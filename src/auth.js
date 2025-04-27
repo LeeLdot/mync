@@ -1,4 +1,3 @@
-//auth.js
 import { auth, provider } from "./firebaseConfig.js";
 import { signInWithPopup, onAuthStateChanged, signOut } from "firebase/auth";
 

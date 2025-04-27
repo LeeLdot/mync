@@ -1,4 +1,3 @@
-//host.js
 import { ref, update } from "firebase/database";
 import { db } from "./firebaseConfig.js";
 

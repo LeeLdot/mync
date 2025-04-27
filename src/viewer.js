@@ -10,7 +10,7 @@ export function configurarViewerPlayer(p) {
   player = p;
   playerReady = true;
 
-  // 🔥 Se já tínhamos dados do Host, sincroniza agora
+  // Se tem dados do Host, sincroniza agora
   if (ultimoData) {
     sincronizarComHost(ultimoData);
   }
@@ -25,7 +25,7 @@ export function escutarAtualizacoesViewer(codigoViewer) {
     ultimoData = data;
 
     if (!player || !playerReady) {
-      return; // 🔥 Espera player carregar
+      return; //Time d load
     }
 
     sincronizarComHost(data);
